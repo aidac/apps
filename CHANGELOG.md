@@ -4,6 +4,9 @@ Newest first. Dates are when the build was pushed.
 
 ## Nov 17 2026
 
+- **Cluster Themes 0.20.6:** E36:
+  - The warning-light strips along the bottom are a little taller, all the way across, so a two-line drive mode (SPORT / INDIVIDUAL) fits; the fuel and coolant gauges and the small window between the dials (ASC, or the M3's /M badge) moved up with them.
+  - The speedometer's flat bottom is level with the rev counter's: the LCD sits a little lower in its dial.
 - **Cluster Themes 0.20.5:** E36:
   - The face round the dials is darker again by day (its rim with it).
   - The range's fuel pump icon on the LCD is smaller, 80 % of the figures' height.

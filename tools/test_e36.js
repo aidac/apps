@@ -262,31 +262,33 @@ test('layout: only the backdrop pieces reach under the hood or the belt light', 
 });
 test('layout: the strips cover BMW\'s bottom row but for its drive mode, gear letter and electric range', () => {
     const ws = loadLayout().widgets;
-    // the strip pieces from 652 (8 px over the row: the drive mode's hole is lifted), the rest ends there
-    ws.filter((w) => overlaps(w, [0, 652, 1920, 720])).forEach((w) => assert.ok(w.type === 'e36dash' && w.stripRow && w.y === 652 && (w.y + w.h === 720 || w.y + w.h === 660), w.id + ': only the strip pieces'));
+    // the strips from 652, 8 px over the row (a two-line drive mode starts above it); the rest ends there
+    ws.filter((w) => overlaps(w, [0, 652, 1920, 720])).forEach((w) => assert.ok(w.type === 'e36dash' && w.stripRow && w.y === 652 && w.y + w.h === 720, w.id + ': only the strip pieces'));
     ws.filter((w) => w.type === 'e36dash' && w.y === 0).forEach((d) => {
         const mine = ws.filter((w) => w.stripRow && w.toggle === d.toggle);
         // BMW's range 107..299, drive mode 1223..1378 (SPORT / INDIVIDUAL on two lines from just above the row) and gear
-        // letter 1380..1460, electric range 1696..1842 (car photos Nov 17 2026) stay open, the drive mode's from 652;
-        // its clock 330..448, messages, the street name (to 1197), outside temperature from 1475 (bench/page.html
-        // backdrop, Nov 13; 1541 on Nov 17) are covered, and the face's band 652..660 but over the drive mode
+        // letter 1380..1460, electric range 1696..1842 (car photos Nov 17 2026) stay open from 652; its clock 330..448,
+        // messages, the street name (to 1197), outside temperature from 1475 (bench/page.html backdrop, Nov 13; 1541 on
+        // Nov 17) are covered
         const all = ws.filter((w) => w.toggle === d.toggle);
-        [[1223, 1378, 652], [1380, 1460, 652], [1696, 1842, 660]].forEach(([x0, x1, y0]) =>
-            assert.deepStrictEqual(all.filter((w) => overlaps(w, [x0, y0, x1, 720])).map((w) => w.id), [], d.id + ' ' + x0));
+        [[1223, 1378], [1380, 1460], [1696, 1842]].forEach(([x0, x1]) =>
+            assert.deepStrictEqual(all.filter((w) => overlaps(w, [x0, 652, x1, 720])).map((w) => w.id), [], d.id + ' ' + x0));
         [[107, 299], [330, 448], [700, 1200], [1462, 1674]].forEach(([x0, x1]) => {
-            for (let x = x0; x < x1; x++) assert.ok(mine.some((w) => w.y + w.h === 720 && x >= w.x && x < w.x + w.w), d.id + ': x ' + x + ' covered');
+            for (let x = x0; x < x1; x++) assert.ok(mine.some((w) => x >= w.x && x < w.x + w.w), d.id + ': x ' + x + ' covered');
         });
-        for (let x = 0; x < 1920; x++) {
-            if (x >= 1214 && x < 1462) continue;
-            assert.ok(mine.some((w) => w.y === 652 && x >= w.x && x < w.x + w.w), d.id + ': the band at x ' + x);
-        }
         // each hole inside a strip, clear of its rounded corners
-        const spans = mine.filter((w) => w.y + w.h === 720).map((w) => [w.x, w.x + w.w]).sort((a, b) => a[0] - b[0]);
+        const spans = mine.map((w) => [w.x, w.x + w.w]).sort((a, b) => a[0] - b[0]);
         spans.slice(1).forEach((g, i) => {
             const h0 = spans[i][1], h1 = g[0];
             assert.ok(d.strips.some((s) => h0 >= s[0] + d.stripR && h1 <= s[0] + s[2] - d.stripR), d.id + ': hole ' + h0 + '..' + h1);
         });
-        assert.ok(d.strips.every((s) => s[1] === 660 && s[1] + s[3] >= 720), d.id + ': the strips fill the row');
+        assert.ok(d.strips.every((s) => s[1] === 652 && s[1] + s[3] >= 720), d.id + ': the strips fill the row');
+        // the speedometer's flat bottom (4 px under the LCD) level with the rev counter's (its cut); the fuel and
+        // coolant gauges' wells (4 px round them) and the ASC / M window clear of the strips' 2 px rim
+        const [lcd] = d.windows, [fuel, , tach, cool] = d.dials;
+        assert.ok(Math.abs(lcd[1] + lcd[3] + 4 - tach.cut) < 0.2, d.id + ': ' + (lcd[1] + lcd[3] + 4) + ' vs ' + tach.cut);
+        [fuel, cool].forEach((g) => assert.ok(g.c[1] + g.r + 4 <= 650.2, d.id + ': small dial bottom ' + (g.c[1] + g.r)));
+        assert.ok(d.windows[2][1] + d.windows[2][3] <= 645, d.id + ': ASC window ' + (d.windows[2][1] + d.windows[2][3]));
     });
 });
 test('layout: the LCD: the range and the trip, under them the clock and the outside temperature', () => {

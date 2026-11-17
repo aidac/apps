@@ -9,7 +9,7 @@ counter (7000, 7500) the M3's: m3-kmh-jpn-day-face.png and m3-us-mph-day-face.pn
 speedometer, the /M badge, the oil temperature gauge where the 328i has its economy gauge). Every measurement below is in that
 photo's pixels, levelled (pairs that sit at one height on the car, like the two big hubs, take their average);
 place() scales a face to the cluster at true proportions, the E36's warning-light strips in BMW's bottom row
-(y 660..720): black, with holes where BMW's own range, drive mode and gear letter, and electric range show through.
+(y 660..720), from 8 px above it: black, with holes where BMW's own drive mode and gear letter, and electric range show through.
 The rest of BMW's row (its clock, messages, outside temperature) is behind the strips; the clock and outside
 temperature show on the LCD's second row instead.
 
@@ -30,7 +30,12 @@ W, H, ROW = 1920, 720, 660           # the cluster; BMW's bottom row is y 660..7
 # The warning-light strips (target px: x, y, w, h), black windows from the top of BMW's bottom row down past the
 # screen's edge; their dividers moved from the E36's (photo x 750 and 1235) so each hole below lies inside a strip,
 # the three symmetric about the middle. Black as BMW's own row (the "strip" role), so the holes don't show.
-STRIPS = [[24, ROW, 382, 80], [424, ROW, 1072, 80], [1514, ROW, 382, 80]]
+# They start LIFT px above BMW's row: BMW sets a two-line drive mode (SPORT / INDIVIDUAL) from a few px above y 660 down
+# to the screen's foot, and the face cut its top off (car photo, Nov 17 2026). The fuel and coolant gauges and the
+# ASC / M window go up as much (SMALL_Y, EU 'windows'), so they keep their gap to the strips.
+LIFT = 8
+TOP = ROW - LIFT
+STRIPS = [[24, TOP, 382, H - TOP + 20], [424, TOP, 1072, H - TOP + 20], [1514, TOP, 382, H - TOP + 20]]
 STRIP_R = 14
 # BMW's own items that show through the strips (x0, x1; the layer pieces skip them), from the car photo of Nov 17
 # 2026 (the theme over BMW's row): the drive mode at 1223..1314 (room for SPORT PLUS / COMFORT either side) and the
@@ -40,12 +45,6 @@ STRIP_R = 14
 # INDIVIDUAL runs on to 1378): the navigation's street name, centred in BMW's row, ends as far right as 1197 and stays
 # covered. BMW's range (its pump icon and figure at 107..299) stays behind the left strip: the LCD shows it, with its own icon.
 HOLES = [(1214, 1462), (1680, 1880)]
-# The drive mode's hole is open LIFT px above the row as well: BMW sets a two-line mode (SPORT / INDIVIDUAL) from a few
-# px above y 660 down to the screen's foot, and the face cut its top off (car photo, Nov 17 2026). Every layer above
-# the row ends at ROW - LIFT; the strip pieces start there, and over the other holes a piece of the face fills the band.
-LIFT = 8
-LIFTED = [HOLES[0]]
-TOP = ROW - LIFT
 
 
 def lerp_ang(table, v):
@@ -253,7 +252,10 @@ SMALL = {'r': 132, 'drop': 62, 'hub': 28, 'tail': 41, 'needle': [130, 7], 'sweep
          # (dy, box size): both glyphs 34 tall, centred 82 above the pivot (the pump fills 0.66 of its box, low;
          # the thermometer 0.94)
          'icons': {'fuel': (-88, 52), 'e36cool': (-82, 36)}}
-SMALL_X, SMALL_Y = (347, 1672), 856   # the circles' centres: level, symmetric about the speedometer and tach (x 1009.5)
+# the photo-to-cluster scale (place(): the small dials' outer edges at the screen's), for what moves in target px
+SCALE = (W - 12) / (2 * (SMALL['r'] + 4) + 1672 - 347)
+# the circles' centres: level, symmetric about the speedometer and tach (x 1009.5); the photo's 856, up LIFT target px
+SMALL_X, SMALL_Y = (347, 1672), round(856 - LIFT / SCALE, 2)
 FUEL_TEXTS = [('0', 'e_lab', -92, -123), ('½', 'e_frac', 0, -158), ('⅟', 'e_frac', 92, -123)]   # (text, font, dx, dy)
 
 
@@ -285,7 +287,10 @@ EU = {
     'photo': 'eu-kmh-day-face.png',
     'mph': False,
     'face': {'box': [100, 470, 1900, 1075], 'radius': 190, 'arch': [1000, 2290, 1820], 'bezel': 40},
-    'windows': [[617, 862, 268, 95, 2], [915, 498, 195, 62, 6], [957, 930, 92, 55, 6]],   # LCD, top lamp, ASC
+    # LCD, top lamp, ASC. The LCD (photo y 862) moved down so the speedometer's flat bottom, 4 target px under it,
+    # lines up with the rev counter's (its cut, 974): on the car the rev counter's read lower. The ASC window (930)
+    # up LIFT target px with the strips.
+    'windows': [[617, round(974 - 4 / SCALE - 95, 2), 268, 95, 2], [915, 498, 195, 62, 6], [957, round(930 - LIFT / SCALE, 2), 92, 55, 6]],
     'arrows': [[457, 669, 55, -1], [1562, 669, 55, 1]],
     'dials': [
         small_dial('fuel', SMALL_X[0], SMALL_Y, [(0, -SMALL['sweep']), (1, SMALL['sweep'])]),
@@ -537,6 +542,7 @@ def place(face):
     fuel, cool = face['dials'][0], face['dials'][3]
     left, right = fuel['c'][0] - fuel['r'] - 4, cool['c'][0] + cool['r'] + 4      # their dark rims included
     s = (W - 12) / (right - left)
+    assert abs(s - SCALE) < 1e-9, 'SCALE is place()\'s'
     ox = 6 - s * left
     oy = ROW - s * STRIP_TOP
     return s, ox, oy
@@ -685,12 +691,10 @@ def build(face, wid, toggle):
         lcd('out', '{{ambient}}', 'e_lcd2', 150, 236, r2, 'right'),
         lcd('outu', '{{u:temp}}', 'e_sm', 238, 262, r2 + 1, 'left'),
     ]
-    # the strip row: the same picture in pieces round the holes, where BMW's own items show (a layer is a rectangle),
-    # from TOP down; over a hole that isn't lifted, the face's band down to the row
+    # the strip row: the same picture in pieces round the holes, where BMW's own items show (a layer is a rectangle)
     edges = [0] + [x for h in HOLES for x in h] + [W]
-    spans = [(x0, TOP, x1, H) for x0, x1 in zip(edges[::2], edges[1::2])] + [(x0, TOP, x1, ROW) for x0, x1 in HOLES if (x0, x1) not in LIFTED]
-    pieces = [dict(dash, id='%s_%s' % (wid, 'abcdefg'[i]), x=x0, y=y0, w=x1 - x0, h=y1 - y0, stripRow='abcdefg'[i])
-              for i, (x0, y0, x1, y1) in enumerate(spans)]
+    pieces = [dict(dash, id='%s_%s' % (wid, 'abcd'[i]), x=x0, y=TOP, w=x1 - x0, h=H - TOP, stripRow='abcd'[i])
+              for i, (x0, x1) in enumerate(zip(edges[::2], edges[1::2]))]
     return [dash, econ] + pieces + texts + icons + lcds + [ndl]
 
 
