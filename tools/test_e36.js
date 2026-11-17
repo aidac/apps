@@ -262,19 +262,26 @@ test('layout: only the backdrop pieces reach under the hood or the belt light', 
 });
 test('layout: the strips cover BMW\'s bottom row but for its drive mode, gear letter and electric range', () => {
     const ws = loadLayout().widgets;
-    const over = ws.filter((w) => overlaps(w, [0, 660, 1920, 720]));
-    over.forEach((w) => assert.ok(w.type === 'e36dash' && w.stripRow && w.y === 660 && w.y + w.h === 720, w.id + ': only the strip pieces'));
+    // the strip pieces from 652 (8 px over the row: the drive mode's hole is lifted), the rest ends there
+    ws.filter((w) => overlaps(w, [0, 652, 1920, 720])).forEach((w) => assert.ok(w.type === 'e36dash' && w.stripRow && w.y === 652 && (w.y + w.h === 720 || w.y + w.h === 660), w.id + ': only the strip pieces'));
     ws.filter((w) => w.type === 'e36dash' && w.y === 0).forEach((d) => {
-        const mine = over.filter((w) => w.toggle === d.toggle);
-        // BMW's range 107..299, drive mode 1223..1314 and gear letter 1380..1460, electric range 1696..1842 (car photo
-        // Nov 17 2026) stay open; its clock 330..448, messages, outside temperature from 1475 (bench/page.html backdrop, Nov 13; 1541 on Nov 17) are covered
-        [[1223, 1314], [1380, 1460], [1696, 1842]].forEach(([x0, x1]) =>
-            assert.deepStrictEqual(mine.filter((w) => overlaps(w, [x0, 660, x1, 720])).map((w) => w.id), [], d.id + ' ' + x0));
-        [[107, 299], [330, 448], [700, 1060], [1462, 1674]].forEach(([x0, x1]) => {
-            for (let x = x0; x < x1; x++) assert.ok(mine.some((w) => x >= w.x && x < w.x + w.w), d.id + ': x ' + x + ' covered');
+        const mine = ws.filter((w) => w.stripRow && w.toggle === d.toggle);
+        // BMW's range 107..299, drive mode 1223..1378 (SPORT / INDIVIDUAL on two lines from just above the row) and gear
+        // letter 1380..1460, electric range 1696..1842 (car photos Nov 17 2026) stay open, the drive mode's from 652;
+        // its clock 330..448, messages, the street name (to 1197), outside temperature from 1475 (bench/page.html
+        // backdrop, Nov 13; 1541 on Nov 17) are covered, and the face's band 652..660 but over the drive mode
+        const all = ws.filter((w) => w.toggle === d.toggle);
+        [[1223, 1378, 652], [1380, 1460, 652], [1696, 1842, 660]].forEach(([x0, x1, y0]) =>
+            assert.deepStrictEqual(all.filter((w) => overlaps(w, [x0, y0, x1, 720])).map((w) => w.id), [], d.id + ' ' + x0));
+        [[107, 299], [330, 448], [700, 1200], [1462, 1674]].forEach(([x0, x1]) => {
+            for (let x = x0; x < x1; x++) assert.ok(mine.some((w) => w.y + w.h === 720 && x >= w.x && x < w.x + w.w), d.id + ': x ' + x + ' covered');
         });
+        for (let x = 0; x < 1920; x++) {
+            if (x >= 1214 && x < 1462) continue;
+            assert.ok(mine.some((w) => w.y === 652 && x >= w.x && x < w.x + w.w), d.id + ': the band at x ' + x);
+        }
         // each hole inside a strip, clear of its rounded corners
-        const spans = mine.map((w) => [w.x, w.x + w.w]).sort((a, b) => a[0] - b[0]);
+        const spans = mine.filter((w) => w.y + w.h === 720).map((w) => [w.x, w.x + w.w]).sort((a, b) => a[0] - b[0]);
         spans.slice(1).forEach((g, i) => {
             const h0 = spans[i][1], h1 = g[0];
             assert.ok(d.strips.some((s) => h0 >= s[0] + d.stripR && h1 <= s[0] + s[2] - d.stripR), d.id + ': hole ' + h0 + '..' + h1);
@@ -292,8 +299,8 @@ test('layout: the LCD: the range and the trip, under them the clock and the outs
         // the icon just before the figure's first digit (hud.js text "lead"), room for it and four digits
         assert.ok(rng.lead && rng.lead.icon === 'e36range' && rng.align === 'right', t + ': the range\'s icon leads its figure');
         assert.ok(rng.w >= 4 * 24 + rng.lead.w + rng.lead.gap, t + ': room for the icon and four digits');
-        // as tall as the digits' ink (the e_lcd 8: rows 2 .. 31 of its 34 px cell) and level with it, inside the box
-        assert.ok(rng.lead.h === 30 && rng.lead.cy === 17 && rng.lead.cy - rng.lead.h / 2 >= 0 && rng.lead.cy + rng.lead.h / 2 <= rng.h, t + ': ' + JSON.stringify(rng.lead));
+        // 80 % of the digits' ink (the e_lcd 8: rows 2 .. 31 of its 34 px cell) and level with it, inside the box
+        assert.ok(rng.lead.h === 24 && rng.lead.w === 34 && rng.lead.cy === 17 && rng.lead.cy - rng.lead.h / 2 >= 0 && rng.lead.cy + rng.lead.h / 2 <= rng.h, t + ': ' + JSON.stringify(rng.lead));
     });
 });
 test('layout: each face has its e36dash, on its own units and redlines (the M3 on the 0 .. 8 rev counter)', () => {

@@ -4,6 +4,10 @@ Newest first. Dates are when the build was pushed.
 
 ## Nov 17 2026
 
+- **Cluster Themes 0.20.5:** E36:
+  - The face round the dials is darker again by day (its rim with it).
+  - The range's fuel pump icon on the LCD is smaller, 80 % of the figures' height.
+  - The hole for BMW's drive mode starts just before it, so a long street name in the middle of BMW's row stays hidden, and it is open a little above the row, so a two-line mode (SPORT / INDIVIDUAL) is no longer cut off at the top.
 - **Cluster Themes 0.20.4:** E36: the range's fuel pump icon on the LCD is as tall as the figures.
 - **Cluster Themes 0.20.3:** E36:
   - The needles move smoothly on the car: the cluster now moves them itself on every frame of the display, along a short path the app sends. Before, the cluster took each new position only 30 times a second and out of step with the display, so the needles moved in uneven steps however often the app sent them.

@@ -36,8 +36,16 @@ STRIP_R = 14
 # 2026 (the theme over BMW's row): the drive mode at 1223..1314 (room for SPORT PLUS / COMFORT either side) and the
 # gear letter (BMW blacks out its gear slot while anything covers x 1380..1460), the electric range at 1696..1842. The hole ends just past the gear slot: the outside
 # temperature has been seen from x 1475 (the Nov 13 2026 photo the bench's backdrop is drawn from; 1541 on Nov 17).
-# BMW's range (its pump icon and figure at 107..299) stays behind the left strip: the LCD shows it, with its own icon.
-HOLES = [(1130, 1462), (1680, 1880)]
+# The hole starts just before the drive mode (its left edge 1223..1226 on both Nov 17 photos, left-aligned: SPORT
+# INDIVIDUAL runs on to 1378): the navigation's street name, centred in BMW's row, ends as far right as 1197 and stays
+# covered. BMW's range (its pump icon and figure at 107..299) stays behind the left strip: the LCD shows it, with its own icon.
+HOLES = [(1214, 1462), (1680, 1880)]
+# The drive mode's hole is open LIFT px above the row as well: BMW sets a two-line mode (SPORT / INDIVIDUAL) from a few
+# px above y 660 down to the screen's foot, and the face cut its top off (car photo, Nov 17 2026). Every layer above
+# the row ends at ROW - LIFT; the strip pieces start there, and over the other holes a piece of the face fills the band.
+LIFT = 8
+LIFTED = [HOLES[0]]
+TOP = ROW - LIFT
 
 
 def lerp_ang(table, v):
@@ -580,7 +588,7 @@ def build(face, wid, toggle):
     emap.sort(key=lambda e: e[0])
     tach = face['dials'][2]
     dash = {
-        'id': wid, 'type': 'e36dash', 'class': 'content', 'z': 0, 'x': 0, 'y': 0, 'w': W, 'h': ROW,
+        'id': wid, 'type': 'e36dash', 'class': 'content', 'z': 0, 'x': 0, 'y': 0, 'w': W, 'h': TOP,
         'toggle': toggle, 'mph': face['mph'],
         'face': {'box': [X(F['box'][0]), Y(F['box'][1]), X(F['box'][2]), Y(F['box'][3])], 'radius': L(F['radius']),
                  'arch': [X(F['arch'][0]), Y(F['arch'][1]), L(F['arch'][2])], 'bezel': L(F['bezel'])},
@@ -599,7 +607,7 @@ def build(face, wid, toggle):
     top, cut = Y(E['top']), Y(tach['cut'])
     half = math.sqrt(max(0.0, r * r - (top - cy) ** 2))
     ex0, ex1 = math.floor(cx - half) - 2, math.ceil(cx + half) + 2
-    ey0, ey1 = math.floor(top) - 3, min(ROW, math.ceil(cut) + 2)
+    ey0, ey1 = math.floor(top) - 3, min(TOP, math.ceil(cut) + 2)
     cl, kl, cr, kr = E['cham']
     cham = [round(cx + L(cl), 1), kl, round(cx + L(cr), 1), kr]
     econ = {
@@ -616,7 +624,7 @@ def build(face, wid, toggle):
     ny0 = max(0, math.floor(min(p[1] - k for p, k in reach)))
     ndl = {
         'id': wid.replace('dash', 'needles'), 'type': 'e36needles', 'class': 'content', 'z': 6,
-        'x': nx0, 'y': ny0, 'w': nx1 - nx0, 'h': ROW - ny0, 'toggle': toggle, 'mph': face['mph'],
+        'x': nx0, 'y': ny0, 'w': nx1 - nx0, 'h': TOP - ny0, 'toggle': toggle, 'mph': face['mph'],
         'dials': needles,
         # the rev counter's needle scale for each "Redline" setting (rev_face())
         'revs': {str(red): {'dial': 2, 'map': [[v, round(a, 2)] for v, a in rev_face(red)['map']]} for red in face['redlines']},
@@ -663,10 +671,11 @@ def build(face, wid, toggle):
                 'text': text, 'font': fname, 'color': color, 'align': align, 'toggle': toggle}
     r1, r2 = 18, 50
     # the range marked as the E90's LCD marks it: an arrow into the fuel pump just before the figure, wherever its
-    # digits start (hud.js text "lead"), the pump as tall as the digits' ink and level with it
+    # digits start (hud.js text "lead"), level with the digits' ink
     top, bot = digit_ink('e_lcd')
     rng = lcd('range', '{{range}}', 'e_lcd', 4, 122, r1, 'right')
-    rng['lead'] = {'icon': 'e36range', 'w': round((bot - top) * 1.4), 'h': bot - top, 'gap': 3, 'cy': (top + bot) / 2}
+    ih = round((bot - top) * 0.8)      # the pump 80 % of the digits' height (car photo, Nov 17 2026: as tall read too big)
+    rng['lead'] = {'icon': 'e36range', 'w': round(ih * 1.4), 'h': ih, 'gap': 3, 'cy': (top + bot) / 2}
     lcds = [
         rng,
         lcd('unit', unit, 'e_sm', 126, 172, r1 + 2, 'left'),
@@ -676,10 +685,12 @@ def build(face, wid, toggle):
         lcd('out', '{{ambient}}', 'e_lcd2', 150, 236, r2, 'right'),
         lcd('outu', '{{u:temp}}', 'e_sm', 238, 262, r2 + 1, 'left'),
     ]
-    # the strip row: the same picture in pieces round the holes, where BMW's own items show (a layer is a rectangle)
+    # the strip row: the same picture in pieces round the holes, where BMW's own items show (a layer is a rectangle),
+    # from TOP down; over a hole that isn't lifted, the face's band down to the row
     edges = [0] + [x for h in HOLES for x in h] + [W]
-    pieces = [dict(dash, id='%s_%s' % (wid, 'abcd'[i]), x=x0, y=ROW, w=x1 - x0, h=H - ROW, stripRow='abcd'[i])
-              for i, (x0, x1) in enumerate(zip(edges[::2], edges[1::2]))]
+    spans = [(x0, TOP, x1, H) for x0, x1 in zip(edges[::2], edges[1::2])] + [(x0, TOP, x1, ROW) for x0, x1 in HOLES if (x0, x1) not in LIFTED]
+    pieces = [dict(dash, id='%s_%s' % (wid, 'abcdefg'[i]), x=x0, y=y0, w=x1 - x0, h=y1 - y0, stripRow='abcdefg'[i])
+              for i, (x0, y0, x1, y1) in enumerate(spans)]
     return [dash, econ] + pieces + texts + icons + lcds + [ndl]
 
 
