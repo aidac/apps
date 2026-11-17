@@ -17,3 +17,7 @@
   sent value, never run on along a slope; and the bench's clock has to be the service's, with the bench restarted
   (server.js and page.html don't live-reload) before judging it. (E36 needle paths, Nov 17 2026: a 0.25 s back
   extrapolation sent the needles jumping on the user's bench, whose page still had the old clock.)
+- **Making room for BMW's own items under a period face:** don't cut a one-off notch or tab into the design to let one
+  item through; change the design's own proportions evenly (a whole strip taller, the parts above moved with it), so it
+  still reads as the original part. (E36 drive mode, Nov 17 2026: an 8 px notch over SPORT / INDIVIDUAL "looks dumb";
+  the user asked for the whole footer raised, the small gauges and badge moved up.)
