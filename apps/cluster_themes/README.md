@@ -83,7 +83,7 @@ The BMW E36 328i cluster of the 90s, as it was: traced off photos of the real th
 - **The LCD** under the speedometer: the range where the E36 showed its odometer (the car doesn't share its mileage), marked with an arrow into the fuel pump as on the E90, and the trip since you started the car; under them the clock and the outside temperature.
 - **After sunset** the print, needles and LCD glow orange-red, the E36's own night lighting (Night colours on Auto).
 - **The warning-light strips** along the bottom, black as on the E36, with BMW's own drive mode, gear letter and electric range showing through them. The rest of BMW's bottom row (its range, clock, messages and outside temperature) stays behind the strips; the seat-belt light still shows, since BMW draws it over every theme.
-- **Left as they were:** the turn arrows and lamp window stay dark (the app can't read those lamps). No shift lights, readouts, map or badge: the E36 had none.
+- **Left as they were:** the lamp window stays dark (the app can't read those lamps). No turn arrows are printed: BMW draws its own over the cluster. No shift lights, readouts, map or badge: the E36 had none.
 
 <p align="center"><img src="../../docs/images/cluster-e36.png" width="900" alt="E36 theme, US face"></p>
 <p align="center"><img src="../../docs/images/cluster-e36-eu.png" width="900" alt="E36 theme, European face"></p>

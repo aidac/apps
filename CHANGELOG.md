@@ -2,6 +2,12 @@
 
 Newest first. Dates are when the build was pushed.
 
+## Nov 18 2026
+
+- **Cluster Themes 0.20.7:** E36:
+  - The coolant gauge holds the middle from 85 to 105 °C, as the car's own gauge does, so a warm engine reads dead centre instead of a little over it; it only moves off the middle when the engine runs cooler or hotter than that.
+  - No turn arrows on the face any more: BMW draws its own over the cluster.
+
 ## Nov 17 2026
 
 - **Cluster Themes 0.20.6:** E36:

@@ -1742,7 +1742,7 @@ void main() {
 const E36DASH = `// The E36 theme (layouts e36.json, made by tools/gen_e36.py) in one cluster-render "effect" layer (GLSL ES 1.00): the
 // BMW E36 328i cluster of the 90s. The black bezel and the dark grey face (a rounded box under a wide arch), four black
 // dials (fuel, speed, revs, coolant) with their ticks, coloured zones (the red rev zone, the fuel and coolant blocks),
-// the LCD and lamp windows and the (unlit) turn arrows. The printed figures are text widgets on top; the economy gauge is
+// the LCD and lamp windows (BMW draws its own turn arrows over the cluster). The printed figures are text widgets on top; the economy gauge is
 // its own small layer (e36econ) and the needles another on top of everything (e36needles), as on the car where they
 // sweep over the print. Under the face, in BMW's bottom row, the black warning-light strips: drawn by the same shader
 // in pieces round the holes where BMW's own items show (gen_e36.py HOLES). Every position is in target px;
@@ -1756,7 +1756,7 @@ precision mediump float;
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform vec2 u_origin;
-uniform vec3 u_col[13];    // bezel, face, dial, mark, needle, hub, red, blue, orange, arrow, well, strip, bg
+uniform vec3 u_col[12];    // bezel, face, dial, mark, needle, hub, red, blue, orange, well, strip, bg
 uniform vec4 u_face;       // the face's box: x0, y0, x1, y1
 uniform vec4 u_faceB;      // its corner radius, the arch's centre x, y and radius
 uniform float u_bezel;     // the black bezel round the face, px
@@ -1768,7 +1768,6 @@ uniform vec4 u_zone[6];    // zones: from angle, to angle, inner radius, outer r
 uniform vec2 u_zoneB[6];   // dial index (round its pivot); colour 0 red, 1 blue, 2 orange (-1 none) + 4 x stripes
 uniform vec4 u_win[3];     // windows (LCD, top lamp, ASC or the M3's /M plate): x, y, w, h (w 0 = none)
 uniform vec3 u_winR;       // their corner radii
-uniform vec4 u_arrow[2];   // the turn arrows: centre x, y, size, direction (-1 left, 1 right)
 uniform float u_light;     // daylight: 1 by day, 0 at night (the glass's glare goes, the depth stays)
 uniform vec4 u_strip[3];   // the warning-light strips: x, y, w, h (w 0 = none)
 uniform float u_stripR;    // their corner radius
@@ -1786,7 +1785,7 @@ vec2 dir(float a) { float r = radians(a); return vec2(sin(r), -cos(r)); }
 
 void main() {
     vec2 p = v_uv * u_size + u_origin;
-    vec3 c = u_col[12];
+    vec3 c = u_col[11];
     vec3 BEZEL = u_col[0], FACE = u_col[1], MARK = u_col[3];
 
     // the bezel and the face: a rounded box under a wide arch. The face is grained plastic, in the hood's shadow under
@@ -1867,18 +1866,7 @@ void main() {
         // sunk like the dials: the frame dark at the top, lit at the bottom, the top edge's shade inside
         float low = clamp((p.y - u_win[i].y) / max(u_win[i].w, 1.0), 0.0, 1.0);
         c = put(c, mix(BEZEL * 0.6, FACE * 0.9, low), cov(d - 2.0) * on);
-        c = put(c, u_col[10] * (1.0 - 0.5 * smoothstep(-10.0, 2.0, boxd(p - vec2(0.0, 7.0), u_win[i], rad))), cov(d) * on);
-    }
-
-    // the turn arrows (never lit: the app can't read them)
-    for (int i = 0; i < 2; i++) {
-        vec4 w = u_arrow[i];
-        vec2 q = (p - w.xy) / max(w.z, 1.0);
-        if (w.z <= 0.0 || abs(q.x) > 0.8 || abs(q.y) > 0.8) continue;
-        q.x *= -w.w;                                   // point the arrow left in q
-        float tail = boxd(q, vec4(0.0, -0.2, 0.5, 0.4), 0.0);
-        float head = max(max(-q.x - 0.5, q.x - 0.05), abs(q.y) - (q.x + 0.5) * 0.85);
-        c = put(c, u_col[9], cov(min(tail, head) * w.z));
+        c = put(c, u_col[9] * (1.0 - 0.5 * smoothstep(-10.0, 2.0, boxd(p - vec2(0.0, 7.0), u_win[i], rad))), cov(d) * on);
     }
 
     // the cluster is lit from the middle: its ends fall off a little
@@ -1897,7 +1885,7 @@ void main() {
         for (int i = 0; i < 3; i++) {
             float d = boxd(p, u_strip[i], u_stripR), on = step(0.5, u_strip[i].z);
             c = put(c, BEZEL * 0.6, cov(d - 2.0) * on);
-            c = put(c, u_col[11], cov(d) * on);
+            c = put(c, u_col[10], cov(d) * on);
         }
     }
 

@@ -291,7 +291,6 @@ EU = {
     # lines up with the rev counter's (its cut, 974): on the car the rev counter's read lower. The ASC window (930)
     # up LIFT target px with the strips.
     'windows': [[617, round(974 - 4 / SCALE - 95, 2), 268, 95, 2], [915, 498, 195, 62, 6], [957, round(930 - LIFT / SCALE, 2), 92, 55, 6]],
-    'arrows': [[457, 669, 55, -1], [1562, 669, 55, 1]],
     'dials': [
         small_dial('fuel', SMALL_X[0], SMALL_Y, [(0, -SMALL['sweep']), (1, SMALL['sweep'])]),
         {'signal': 'speed', 'c': [745, 763], 'r': 238, 'cut': 860, 'pivot': [745, 763], 'hub': 33, 'tail': 50,
@@ -300,8 +299,9 @@ EU = {
         # cut flat just under the economy gauge's ticks, as its window's bottom (the photos: EU ~978, US 945 -> 969)
         {'signal': 'rpm', 'c': [1270, 763], 'r': 238, 'cut': 974, 'pivot': [1270, 763], 'hub': 33, 'tail': 50,
          'needle': [228, 9], 'map': rev_face(_REDLINE['default'])['map'], 'rest': -117},
-        # 50 and 120 °C at the blue and red blocks' middles
-        small_dial('coolant', SMALL_X[1], SMALL_Y, [(40, -44), (50, -35), (90, 0), (120, 35), (130, 44)]),
+        # 50 and 120 °C at the blue and red blocks' middles; like the car's own gauge it holds the middle across the
+        # normal running band (85 .. 105 °C), so a warm engine reads dead centre and only a real rise moves it
+        small_dial('coolant', SMALL_X[1], SMALL_Y, [(40, -44), (50, -35), (85, 0), (105, 0), (120, 35), (130, 44)]),
     ],
     # [dial, first angle, last angle, count, outer radius, length, width]
     'ticks': [
@@ -605,7 +605,6 @@ def build(face, wid, toggle):
         'revs': {str(red): {'dial': 2, 'ticks': [tk(g) for g in R['ticks']], 'zones': [zn(z) for z in R['zones']]}
                  for red, R in ((r, rev_face(r)) for r in face['redlines'])},
         'windows': [[X(x), Y(y), L(w), L(h), L(r)] for x, y, w, h, r in face['windows']],
-        'arrows': [[X(x), Y(y), L(sz), d] for x, y, sz, d in face['arrows']],
         'strips': STRIPS, 'stripR': STRIP_R,
     }
     # the economy gauge's own layer: its window in the rev counter, from the top line down to the dial's flat cut
@@ -734,7 +733,7 @@ def layout():
                   'traced off face-on photos at true proportions. The EU face (km/h, L/100km) with metric units, the US face '
                   '(MPH, MPG) with US units; with the redline at 7000 or 7500 (the 0 .. 8 rev counter) the M3\'s faces: red needles, '
                   'a 280 km/h or 170 MPH speedometer, the /M badge, an oil temperature gauge for the economy gauge. One e36dash shader draws the face, dials, ticks, zones and needles; the printed '
-                  'figures are text widgets. Lamps and turn arrows are never lit (the app cannot read them). The warning-light strips '
+                  'figures are text widgets. Lamps are never lit (the app cannot read them); BMW draws its own turn arrows over the cluster. The warning-light strips '
                   'cover BMW\'s bottom row but for holes where its range, drive mode, gear letter and electric range show; the clock '
                   'and outside temperature are on the LCD\'s second row. Widget reference: shared/hud.js header.',
         'widgets': widgets,

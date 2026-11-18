@@ -354,7 +354,7 @@ const TILE_MAX = 14;       // half a flash: red, then the normal colour
 const MVIEW_RPM = 8000;            // the M view theme's rev scale: 0..8
 const MVIEW_SPEED = { us: 200, metric: 330 };
 // the E36 shader's colour roles, in u_col order (hud_themes.js e36)
-const E36_ROLES = ['bezel', 'face', 'dial', 'mark', 'needle', 'hub', 'red', 'blue', 'orange', 'arrow', 'well', 'strip', 'bg'];
+const E36_ROLES = ['bezel', 'face', 'dial', 'mark', 'needle', 'hub', 'red', 'blue', 'orange', 'well', 'strip', 'bg'];
 const E36_ZONE_COLORS = ['red', 'blue', 'orange'];      // u_zoneB's colour codes
 const VDASH_RPM = 8000;            // the Vector theme's rev counter: 0..8
 const MEDIA_IF = 'de.bmw.infotainment.hmi.hmimediastate.HmiMediaState';   // the head unit's now playing (front)
@@ -2229,7 +2229,6 @@ class HudApp {
             const Wn = pad(w.windows || [], 3, null);   // [x, y, w, h, radius]
             c.uniform(ref, 'u_win', flat(Wn.map((g) => (g ? g.slice(0, 4) : [0, 0, 0, 0]))), { type: 'vec4' });
             c.uniform(ref, 'u_winR', Wn.map((g) => (g ? g[4] : 0)));
-            c.uniform(ref, 'u_arrow', flat(pad(w.arrows || [], 2, [0, 0, 0, 0])), { type: 'vec4' });
             c.uniform(ref, 'u_light', [this.nightOn ? 0 : 1]);     // the glass's glare by day only
             c.uniform(ref, 'u_strip', flat(pad(w.strips || [], 3, [0, 0, 0, 0])), { type: 'vec4' });
             c.uniform(ref, 'u_stripR', [w.stripR || 0]);

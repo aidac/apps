@@ -152,7 +152,7 @@ const THEMES = {
         ink: [10, 10, 12, 255], accent: [235, 52, 30, 255],
         bezel: [12, 12, 13, 255], face: [20, 21, 22, 255], dial: [10, 10, 12, 255], mark: [240, 240, 236, 255],
         needle: [238, 232, 214, 255], hub: [38, 38, 40, 255], red: [235, 52, 30, 255], blue: [62, 150, 226, 255],
-        orange: [242, 112, 34, 255], arrow: [30, 46, 38, 255], well: [12, 12, 14, 255], lcd: [255, 96, 42, 255],
+        orange: [242, 112, 34, 255], well: [12, 12, 14, 255], lcd: [255, 96, 42, 255],
         strip: [0, 0, 0, 255],      // black as BMW's own bottom row, which shows through the strips' holes
         mneedle: [236, 70, 58, 255],     // the M3 face's red needles (m3-kmh-jpn-day-face.png, cleaned of glare)
         noGarland: true,
@@ -161,7 +161,7 @@ const THEMES = {
             line: [44, 45, 49, 255],
             bezel: [10, 10, 11, 255], face: [19, 20, 21, 255], dial: [16, 15, 19, 255], mark: [248, 100, 80, 255],
             needle: [236, 150, 134, 255], hub: [28, 28, 31, 255], red: [222, 58, 44, 255], blue: [24, 110, 140, 255],
-            orange: [235, 92, 28, 255], arrow: [18, 26, 21, 255], well: [8, 8, 10, 255], lcd: [255, 110, 60, 255],
+            orange: [235, 92, 28, 255], well: [8, 8, 10, 255], lcd: [255, 110, 60, 255],
             strip: [0, 0, 0, 255],
             mneedle: [230, 72, 54, 255],     // still red at night (m3-night-reference.png)
         },

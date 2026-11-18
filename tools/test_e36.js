@@ -219,8 +219,8 @@ test('nightTheme: other themes still dim their whites and greys to 60 %', () => 
     assert.deepStrictEqual(t.bar, themes.THEMES.classic.bar);
 });
 test('E36 palette: every role the layout uses exists by day and by night', () => {
-    const roles = ['bg', 'bezel', 'face', 'dial', 'mark', 'needle', 'hub', 'red', 'blue', 'orange', 'arrow', 'well',
-        'lcd', 'strip', 'fg', 'dim'];
+    const roles = ['bg', 'bezel', 'face', 'dial', 'mark', 'needle', 'hub', 'red', 'blue', 'orange', 'well', 'lcd',
+        'strip', 'fg', 'dim'];
     roles.forEach((r) => {
         assert.ok(Array.isArray(themes.THEMES.e36[r]), 'day ' + r);
         assert.ok(Array.isArray(themes.nightTheme(themes.THEMES.e36, 0.6)[r]), 'night ' + r);
@@ -357,6 +357,14 @@ test('layout: no trip knob or light sensor (redundant on a screen)', () => {
     loadLayout().widgets.filter((w) => w.type === 'e36dash').forEach((w) => {
         assert.strictEqual(w.knob, undefined, w.id);
         assert.strictEqual(w.sensor, undefined, w.id);
+    });
+});
+test('layout: the coolant needle holds the middle from 85 to 105 C, like the car', () => {
+    loadLayout().widgets.filter((w) => w.type === 'e36needles').forEach((w) => {
+        const m = w.dials.find((d) => d.signal === 'coolant').map;
+        [85, 90, 95, 105].forEach((c) => assert.strictEqual(e36.frac(c, m), 0, w.id + ' ' + c + ' C'));
+        assert.ok(e36.frac(80, m) < 0 && e36.frac(110, m) > 0, w.id + ': moves outside the band');
+        assert.strictEqual(e36.frac(120, m), 35, w.id + ': 120 C still on the red block');
     });
 });
 test('layout: the M3 faces: 280 km/h, 170 MPH, the oil scale, the /M badge', () => {
